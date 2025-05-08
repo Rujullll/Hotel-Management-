@@ -1,0 +1,15 @@
+-- Run stored procedures
+BEGIN
+    display_reservations(1);
+    get_total_revenue(1);
+END;
+/
+
+-- View tables
+SELECT * FROM Hotel;
+SELECT * FROM Restaurant;
+SELECT * FROM RoomType;
+SELECT * FROM Room;
+SELECT * FROM Employee;
+SELECT * FROM Customer;
+SELECT * FROM Booking;
