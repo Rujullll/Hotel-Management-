@@ -1,0 +1,42 @@
+-- Display reservations for a room
+CREATE OR REPLACE PROCEDURE display_reservations(p_room_id Room.room_id%TYPE) AS
+    CURSOR c_bookings IS
+        SELECT b.booking_id, c.first_name, c.last_name, 
+               b.check_in_date, b.check_out_date, b.total_amount
+        FROM Booking b
+        JOIN Customer c ON b.customer_id = c.customer_id
+        WHERE b.room_id = p_room_id;
+    v_booking c_bookings%ROWTYPE;
+BEGIN
+    OPEN c_bookings;
+    DBMS_OUTPUT.PUT_LINE('Booking ID | Customer Name | Check-In | Check-Out | Amount');
+    LOOP
+        FETCH c_bookings INTO v_booking;
+        EXIT WHEN c_bookings%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_booking.booking_id || ' | ' || 
+                             v_booking.first_name || ' ' || v_booking.last_name || ' | ' || 
+                             v_booking.check_in_date || ' | ' || 
+                             v_booking.check_out_date || ' | ' || 
+                             v_booking.total_amount);
+    END LOOP;
+    CLOSE c_bookings;
+END;
+/
+
+-- Get total revenue of a hotel
+CREATE OR REPLACE PROCEDURE get_total_revenue(p_hotel_id IN NUMBER) AS
+    p_total_revenue NUMBER;
+    v_hotel_name Hotel.name%TYPE;
+BEGIN
+    SELECT SUM(total_amount) INTO p_total_revenue
+    FROM Booking b JOIN Room r ON b.room_id = r.room_id
+    WHERE r.hotel_id = p_hotel_id;
+
+    SELECT name INTO v_hotel_name FROM Hotel WHERE hotel_id = p_hotel_id;
+
+    DBMS_OUTPUT.PUT_LINE('Total revenue for hotel ' || v_hotel_name || ' (ID: ' || TO_CHAR(p_hotel_id) || ') is: ₹' || TO_CHAR(p_total_revenue));
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No bookings found for hotel with ID ' || TO_CHAR(p_hotel_id));
+END;
+/
